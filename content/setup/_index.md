@@ -1,5 +1,5 @@
 +++
-title = "What's in the Box?"
+title = "Setup Guide"
 type = "docs"
 weight = 20
 +++
