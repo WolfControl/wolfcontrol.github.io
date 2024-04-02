@@ -1,17 +1,5 @@
 +++
-title = "My Wonderful Site"
-
-[[cascade]]
+title = "WolfControl Documentation"
 type = "docs"
-
-  [cascade._target]
-  path = "/**"
+weight = 30
 +++
-
-## This is the landing page
-
-Hello
-
-## Second Heading
-
-World!
