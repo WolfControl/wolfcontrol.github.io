@@ -1,5 +1,5 @@
 +++
-title = "Getting Started"
+title = "Profiles"
 type = "docs"
 weight = 20
 +++

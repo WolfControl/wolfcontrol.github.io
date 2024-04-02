@@ -5,3 +5,4 @@ title = 'My New Hugo Site'
 proxy = "direct"
 [[module.imports]]
 path = "github.com/google/docsy"
+
