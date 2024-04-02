@@ -1,0 +1,982 @@
+openapi: 3.0.3
+info:
+  title: WolfControl API - OpenAPI 3.0
+  description: |-
+    Local API for monitoring and state management of WolfControl clients.
+  version: 0.0.1
+servers:
+  - url: https://app.wolfcontrol.io/api/v1
+tags:
+  - name: provisioning
+    description: Provisioning of new gateways and clients
+  - name: gateways
+    description: Gateway management
+  - name: clients
+    description: Client management
+  - name: nutrient-profiles
+    description: nutrient profile management
+  - name: state-profiles
+    description: Desired state profile management
+  - name: pid-profiles
+    description: PID profile management
+
+paths:
+
+  /provisioning/gateways/{id}:
+    post:
+      tags:
+        - provisioning
+      summary: Adopt a gateway by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gateway'
+      responses:
+        '200':
+          description: Gateway adopted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gateway'
+        '404':
+          description: Gateway not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+
+  /provisioning/clients/{id}:
+    post:
+      tags:
+        - provisioning
+      summary: Adopt a client by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '200':
+          description: Client adopted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Client not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  
+    
+  /gateways:
+    get:
+      tags:
+        - gateways
+      summary: Get a list of all gateways
+      responses:
+        '200':
+          description: A list of gateways
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Gateway'
+        '404':
+          description: No gateways found
+        '500':
+          description: Internal server error
+  /gateways/provisioning:
+    get:
+      tags:
+        - gateways
+      summary: Get a list of all discoverable gateways
+      responses:
+        '200':
+          description: A list of discoverable gateways
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayHeartbeat'
+        '404':
+          description: No discoverable gateways found
+        '500':
+          description: Internal server error
+  /gateways/{name}:
+    get:
+      tags:
+        - gateways
+      summary: Get a single gateway by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            example: GW01
+      responses:
+        '200':
+          description: A single gateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gateway'
+        '404':
+          description: Gateway not found
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - gateways
+      summary: Update a gateway by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gateway'
+      responses:
+        '200':
+          description: Gateway updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gateway'
+        '404':
+          description: Gateway not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - gateways
+      summary: Delete a gateway by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Gateway deleted successfully
+        '404':
+          description: Gateway not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /gateways/{name}/status:
+    get:
+      tags:
+        - gateways
+      summary: Get the status of a single gateway by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The status of the gateway
+          content:
+            application/json:
+              schema:
+                type: string
+                enum:
+                  - adoptable
+                  - online
+                  - unknown
+                  - error
+        '500':
+          description: Internal server error
+  /gateways/{name}/metrics:
+    get:
+        tags:
+          - gateways
+        summary: Get sensor readings from a gateway
+        description: Select by time range and optionally node Ids
+        operationId: getSensorInfo
+        parameters:
+          - in: path
+            name: name
+            required: true
+            description: The Id of the gateway to retrieve data from.
+            schema:
+              type: string
+          - in: query
+            name: nodeIds
+            schema:
+              type: array
+              items:
+                type: string
+            required: false
+            description: An array of metric Ids to retrieve. Optional, if not provided, all metrics for the gateway are returned.
+          - in: query
+            name: startTime
+            schema:
+              type: string
+              format: date-time
+            required: true
+            description: The start of the time range for filtering sensor data (inclusive).
+          - in: query
+            name: endTime
+            schema:
+              type: string
+              format: date-time
+            required: false
+            description: The end of the time range for filtering sensor data (inclusive). If not provided, defaults to the current time.
+        responses:
+          '200':
+            description: A list of metrics matching the query parameters.
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Metric'
+          '400':
+            description: Bad request. One or more query parameters are missing or invalid.
+          '500':
+            description: Internal server error.
+
+
+  /clients:
+    get:
+      tags:
+        - clients
+      summary: Get a list of all clients
+      responses:
+        '200':
+          description: A list of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '500':
+          description: Internal server error
+  /clients/provisioning:
+    get:
+      tags:
+        - gateways
+      summary: Get a list of all discoverable clients
+      responses:
+        '200':
+          description: A list of discoverable clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientHeartbeat'
+        '404':
+          description: No discoverable clients found
+        '500':
+          description: Internal server error
+  /clients/{name}:
+    get:
+      tags:
+        - clients
+      summary: Get a single client by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - clients
+      summary: Update a client by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '200':
+          description: Client updated successfully
+        '404':
+          description: Client not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - clients
+      summary: Delete a client by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Client deleted successfully
+        '404':
+          description: Client not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /clients/{name}/status:
+    get:
+      tags:
+        - clients
+      summary: Get the status of a single client by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The status of the client
+          content:
+            application/json:
+              schema:
+                type: string
+                enum:
+                  - adoptable
+                  - online
+                  - unknown
+                  - error
+        '500':
+          description: Internal server error
+
+  /nutrient-profiles:
+    get:
+      tags:
+        - nutrient-profiles
+      summary: Get a list of all nutrient profiles
+      responses:
+        '200':
+          description: A list of nutrient profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NutrientProfile'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - nutrient-profiles
+      summary: Create a new nutrient profile
+      requestBody:
+        description: nutrient profile object to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NutrientProfile'
+      responses:
+        '200':
+          description: The created nutrient profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutrientProfile'
+        '500':
+          description: Internal server error
+  /nutrient-profiles/{name}:
+    get:
+      tags:
+        - nutrient-profiles
+      summary: Get a single nutrient profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single nutrient profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutrientProfile'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - nutrient-profiles
+      summary: Update a nutrient profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NutrientProfile'
+      responses:
+        '200':
+          description: nutrient profile updated successfully
+        '404':
+          description: nutrient profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - nutrient-profiles
+      summary: Delete a nutrient profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: nutrient profile deleted successfully
+        '404':
+          description: nutrient profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /state-profiles:
+    get:
+      tags:
+        - state-profiles
+      summary: Get a list of all desired state profiles
+      responses:
+        '200':
+          description: A list of desired state profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StateProfile'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - state-profiles
+      summary: Create a new desired state profile
+      requestBody:
+        description: Desired state profile object to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateProfile'
+      responses:
+        '200':
+          description: The created desired state profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateProfile'
+        '500':
+          description: Internal server error
+  /state-profiles/{name}:
+    get:
+      tags:
+        - state-profiles
+      summary: Get a single desired state profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single desired state profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateProfile'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - state-profiles
+      summary: Update a desired state profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StateProfile'
+      responses:
+        '200':
+          description: Desired state profile updated successfully
+        '404':
+          description: Desired state profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - state-profiles
+      summary: Delete a desired state profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Desired state profile deleted successfully
+        '404':
+          description: Desired state profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+  /pid-profiles:
+    get:
+      tags:
+        - pid-profiles
+      summary: Get a list of all PID profiles
+      responses:
+        '200':
+          description: A list of PID profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PIDProfile'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - pid-profiles
+      summary: Create a new PID profile
+      requestBody:
+        description: PID profile object to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PIDProfile'
+      responses:
+        '200':
+          description: The created PID profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PIDProfile'
+        '500':
+          description: Internal server error
+  /pid-profiles/{name}:
+    get: 
+      tags:
+        - pid-profiles
+      summary: Get a single PID profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single PID profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PIDProfile'
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - pid-profiles
+      summary: Update a PID profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PIDProfile'
+      responses:
+        '200':
+          description: PID profile updated successfully
+        '404':
+          description: PID profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - pid-profiles
+      summary: Delete a PID profile by ID
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: PID profile deleted successfully
+        '404':
+          description: PID profile not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+          
+components:
+  schemas:
+    GatewayHeartbeat:
+      type: object
+      properties:
+        gatewayid:
+          type: string
+        espnowmac:
+          type: string
+        espwifimac:
+          type: string
+        espnowfwversion:
+          type: string
+        espwififwversion:
+          type: string
+        status:
+          type: string
+          enum:
+            - adoptable
+            - online
+            - error
+      required:
+        - gatewayid
+        - espnowmac
+        - espwifimac
+        - espnowfwversion
+        - espwififwversion
+        - status
+    ClientHeartbeat:
+      type: object
+      properties:
+        clientid:
+          type: string
+        gatewayids:
+          type: array
+          items:
+            type: string
+        macaddress:
+          type: string
+        firmwareversion:
+          type: string
+        nodes:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+            - adoptable
+            - online
+            - error
+      required:
+        - clientid
+        - gatewayid
+        - macaddress
+        - firmwareversion
+        - nodes
+        - status
+
+
+
+    Gateway:
+      type: object
+      properties:
+        espnowfirmwareversion:
+          type: string
+        espwififirmwareversion:
+          type: string
+        espnowmac:
+          type: string
+        espwifimac:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        activepidprofile:
+          type: string
+          format: objectId
+          nullable: true
+        activenutrientprofile:
+          type: string
+          format: objectId
+          nullable: true
+        activestateprofile:
+          type: string
+          format: objectId
+          nullable: true
+        solutionvolume:
+          type: number
+          description: The total volume of the the system in liters
+        clients:
+          type: array
+          items:
+            type: string
+            format: objectId
+      required:
+        - espnowfwversion
+        - espwififwversion
+        - espnowmac
+        - espwifimac
+        - name
+        - clients
+        - solutionvolume
+    Client:
+      type: object
+      properties:
+        firmwareversion:
+          type: string
+        espnowmac:
+          type: string
+        devicetype:
+          type: string
+          enum:
+            - water_sensor
+            - peristaltic_pump
+            - atmosphere_sensor
+        name:
+          type: string
+        gatewayname:
+          type: string
+        description:
+          type: string
+          nullable: true
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+      required:
+        - firmwareversion
+        - espnowmac
+        - devicetype
+        - name
+        - nodes
+    Node:
+      type: object
+      properties:
+        nodeid:
+          type: string
+        lastcalibrated:
+          type: string
+          format: date-time
+          nullable: true
+    
+
+    NutrientProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        pumps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PumpClientSetting'
+      required:
+        - name
+        - settings
+    
+    PumpClientSetting:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PumpNodeSetting'
+    PumpNodeSetting:
+      type: object
+      properties:
+        name:
+          type: string
+        mode:
+          type: string
+          enum:
+            - ratio
+            - pHUp
+            - pHDown
+            - manual
+            - inactive
+        chemicalname:
+          type: string
+          nullable: true
+        ratio:
+          type: number
+          nullable: true
+
+    Metric:
+          type: object
+          properties:
+            NodeId:
+              type: string
+            ClientID:
+              type: string
+            GatewayID:
+              type: string
+            Timestamps:
+              type: array
+              items:
+                type: string
+                format: date-time
+            Values:
+              type: array
+              items:
+                type: number
+          required:
+            - NodeId
+            - ClientID
+            - GatewayID
+            - Timestamps
+            - Values
+
+    StateProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        settings:
+          type: object
+          properties:
+            ph:
+              type: number
+              description: Desired pH level
+            ec:
+              type: number
+              description: Desired electrical conductivity in mS/cm
+            watertemp:
+              type: number
+              description: Desired water temperature in °C
+            daytemp:
+              type: number
+              description: Desired daytime air temperature in °C
+            nighttemp:
+              type: number
+              description: Desired nighttime air temperature in °C
+            humidity:
+              type: number
+              description: Desired humidity in percentage
+      required:
+        - name
+        - settings
+
+    PIDProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        Settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PIDSetting'
+      required:
+        - name
+        - Settings
+    PIDSetting:
+      type: object
+      properties:
+        nodeId:
+          type: string
+          description: The ID of the sensor node associated with this PID controller
+        kp:
+          type: number
+          description: Proportional gain
+        ki:
+          type: number
+          description: Integral gain
+        kd:
+          type: number
+          description: Derivative gain
+      required:
+        - nodeId
+        - kp
+        - ki
+        - kd
+
+# V2 proposed changes
+# Move adoption routes to gateways and clients
+# Pagination
+# Change name to id throughout, unique identifier
+# Use description for human readable names
