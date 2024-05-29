@@ -64,15 +64,15 @@ paths:
               - upgrade_client
           description: Filter tasks by type.
       responses:
-        '200':
+        "200":
           description: A list of tasks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Task'
-        '500':
+                  $ref: "#/components/schemas/Task"
+        "500":
           description: Internal server error
   /tasks/{id}:
     get:
@@ -86,15 +86,15 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single task
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
-        '404':
+                $ref: "#/components/schemas/Task"
+        "404":
           description: Task not found
-        '500':
+        "500":
           description: Internal server error
 
   /provisioning/gateways/{id}:
@@ -113,19 +113,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Gateway'
+              $ref: "#/components/schemas/Gateway"
       responses:
-        '200':
+        "200":
           description: Gateway adopted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Gateway'
-        '404':
+                $ref: "#/components/schemas/Gateway"
+        "404":
           description: Gateway not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
 
   /provisioning/clients/{id}:
@@ -144,19 +144,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Client'
+              $ref: "#/components/schemas/Client"
       responses:
-        '200':
+        "200":
           description: Client adopted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
-        '404':
+                $ref: "#/components/schemas/Client"
+        "404":
           description: Client not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
 
   /gateways:
@@ -165,17 +165,17 @@ paths:
         - gateways
       summary: Get a list of all gateways
       responses:
-        '200':
+        "200":
           description: A list of gateways
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Gateway'
-        '404':
+                  $ref: "#/components/schemas/Gateway"
+        "404":
           description: No gateways found
-        '500':
+        "500":
           description: Internal server error
   /gateways/provisioning:
     get:
@@ -183,17 +183,17 @@ paths:
         - gateways
       summary: Get a list of all discoverable gateways
       responses:
-        '200':
+        "200":
           description: A list of discoverable gateways
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GatewayHeartbeat'
-        '404':
+                  $ref: "#/components/schemas/GatewayHeartbeat"
+        "404":
           description: No discoverable gateways found
-        '500':
+        "500":
           description: Internal server error
   /gateways/{name}:
     get:
@@ -208,15 +208,15 @@ paths:
             type: string
             example: GW01
       responses:
-        '200':
+        "200":
           description: A single gateway
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Gateway'
-        '404':
+                $ref: "#/components/schemas/Gateway"
+        "404":
           description: Gateway not found
-        '500':
+        "500":
           description: Internal server error
     patch:
       tags:
@@ -233,19 +233,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Gateway'
+              $ref: "#/components/schemas/Gateway"
       responses:
-        '200':
+        "200":
           description: Gateway updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Gateway'
-        '404':
+                $ref: "#/components/schemas/Gateway"
+        "404":
           description: Gateway not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
     delete:
       tags:
@@ -258,13 +258,13 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: Gateway deleted successfully
-        '404':
+        "404":
           description: Gateway not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
   /gateways/{name}/status:
     get:
@@ -278,7 +278,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: The status of the gateway
           content:
             application/json:
@@ -289,7 +289,7 @@ paths:
                   - online
                   - unknown
                   - error
-        '500':
+        "500":
           description: Internal server error
   /gateways/{name}/metrics:
     get:
@@ -328,17 +328,17 @@ paths:
           required: false
           description: The end of the time range for filtering sensor data (inclusive). If not provided, defaults to the current time.
       responses:
-        '200':
+        "200":
           description: A list of metrics matching the query parameters.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Metric'
-        '400':
+                  $ref: "#/components/schemas/Metric"
+        "400":
           description: Bad request. One or more query parameters are missing or invalid.
-        '500':
+        "500":
           description: Internal server error.
   /gateways/{id}/update:
     get:
@@ -352,17 +352,17 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A list of available firmware versions
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GatewayUpdate'
-        '404':
+                  $ref: "#/components/schemas/GatewayUpdate"
+        "404":
           description: Gateway not found
-        '500':
+        "500":
           description: Internal server error
     post:
       tags:
@@ -389,18 +389,18 @@ paths:
                 - espnowfirmwareversion
                 - wififirmwareversion
       responses:
-        '202':
+        "202":
           description: Firmware upgrade task created successfully
           content:
             application/json:
               schema:
                 type: string
-                example: '123abc-456def-789ghi'
-        '404':
+                example: "123abc-456def-789ghi"
+        "404":
           description: Gateway not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
 
   /clients:
@@ -409,33 +409,33 @@ paths:
         - clients
       summary: Get a list of all clients
       responses:
-        '200':
+        "200":
           description: A list of clients
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Client'
-        '500':
+                  $ref: "#/components/schemas/Client"
+        "500":
           description: Internal server error
   /clients/provisioning:
     get:
       tags:
-        - gateways
+        - clients
       summary: Get a list of all discoverable clients
       responses:
-        '200':
+        "200":
           description: A list of discoverable clients
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientHeartbeat'
-        '404':
+                  $ref: "#/components/schemas/ClientHeartbeat"
+        "404":
           description: No discoverable clients found
-        '500':
+        "500":
           description: Internal server error
   /clients/{name}:
     get:
@@ -449,13 +449,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single client
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
-        '500':
+                $ref: "#/components/schemas/Client"
+        "500":
           description: Internal server error
     patch:
       tags:
@@ -472,15 +472,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Client'
+              $ref: "#/components/schemas/Client"
       responses:
-        '200':
+        "200":
           description: Client updated successfully
-        '404':
+        "404":
           description: Client not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
     delete:
       tags:
@@ -493,13 +493,13 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: Client deleted successfully
-        '404':
+        "404":
           description: Client not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
   /clients/{name}/status:
     get:
@@ -513,7 +513,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: The status of the client
           content:
             application/json:
@@ -524,7 +524,7 @@ paths:
                   - online
                   - unknown
                   - error
-        '500':
+        "500":
           description: Internal server error
   /clients/{id}/update:
     get:
@@ -538,17 +538,17 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A list of available firmware versions
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientUpdate'
-        '404':
+                  $ref: "#/components/schemas/ClientUpdate"
+        "404":
           description: Client not found
-        '500':
+        "500":
           description: Internal server error
     post:
       tags:
@@ -572,18 +572,18 @@ paths:
               required:
                 - firmwareversion
       responses:
-        '202':
+        "202":
           description: Firmware upgrade task created successfully
           content:
             application/json:
               schema:
                 type: string
-                example: '123abc-456def-789ghi'
-        '404':
+                example: "123abc-456def-789ghi"
+        "404":
           description: Client not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
 
   /nutrient-profiles:
@@ -592,15 +592,15 @@ paths:
         - nutrient-profiles
       summary: Get a list of all nutrient profiles
       responses:
-        '200':
+        "200":
           description: A list of nutrient profiles
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NutrientProfile'
-        '500':
+                  $ref: "#/components/schemas/NutrientProfile"
+        "500":
           description: Internal server error
     post:
       tags:
@@ -612,15 +612,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NutrientProfile'
+              $ref: "#/components/schemas/NutrientProfile"
       responses:
-        '200':
+        "200":
           description: The created nutrient profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NutrientProfile'
-        '500':
+                $ref: "#/components/schemas/NutrientProfile"
+        "500":
           description: Internal server error
   /nutrient-profiles/{name}:
     get:
@@ -634,13 +634,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single nutrient profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NutrientProfile'
-        '500':
+                $ref: "#/components/schemas/NutrientProfile"
+        "500":
           description: Internal server error
     patch:
       tags:
@@ -657,15 +657,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NutrientProfile'
+              $ref: "#/components/schemas/NutrientProfile"
       responses:
-        '200':
+        "200":
           description: nutrient profile updated successfully
-        '404':
+        "404":
           description: nutrient profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
     delete:
       tags:
@@ -678,13 +678,13 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: nutrient profile deleted successfully
-        '404':
+        "404":
           description: nutrient profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
   /state-profiles:
     get:
@@ -692,15 +692,15 @@ paths:
         - state-profiles
       summary: Get a list of all desired state profiles
       responses:
-        '200':
+        "200":
           description: A list of desired state profiles
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StateProfile'
-        '500':
+                  $ref: "#/components/schemas/StateProfile"
+        "500":
           description: Internal server error
     post:
       tags:
@@ -712,15 +712,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StateProfile'
+              $ref: "#/components/schemas/StateProfile"
       responses:
-        '200':
+        "200":
           description: The created desired state profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StateProfile'
-        '500':
+                $ref: "#/components/schemas/StateProfile"
+        "500":
           description: Internal server error
   /state-profiles/{name}:
     get:
@@ -734,13 +734,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single desired state profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StateProfile'
-        '500':
+                $ref: "#/components/schemas/StateProfile"
+        "500":
           description: Internal server error
     patch:
       tags:
@@ -757,15 +757,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StateProfile'
+              $ref: "#/components/schemas/StateProfile"
       responses:
-        '200':
+        "200":
           description: Desired state profile updated successfully
-        '404':
+        "404":
           description: Desired state profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
     delete:
       tags:
@@ -778,13 +778,13 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: Desired state profile deleted successfully
-        '404':
+        "404":
           description: Desired state profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
   /pid-profiles:
     get:
@@ -792,15 +792,15 @@ paths:
         - pid-profiles
       summary: Get a list of all PID profiles
       responses:
-        '200':
+        "200":
           description: A list of PID profiles
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PIDProfile'
-        '500':
+                  $ref: "#/components/schemas/PIDProfile"
+        "500":
           description: Internal server error
     post:
       tags:
@@ -812,15 +812,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PIDProfile'
+              $ref: "#/components/schemas/PIDProfile"
       responses:
-        '200':
+        "200":
           description: The created PID profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PIDProfile'
-        '500':
+                $ref: "#/components/schemas/PIDProfile"
+        "500":
           description: Internal server error
   /pid-profiles/{name}:
     get:
@@ -834,13 +834,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A single PID profile
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PIDProfile'
-        '500':
+                $ref: "#/components/schemas/PIDProfile"
+        "500":
           description: Internal server error
     patch:
       tags:
@@ -857,15 +857,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PIDProfile'
+              $ref: "#/components/schemas/PIDProfile"
       responses:
-        '200':
+        "200":
           description: PID profile updated successfully
-        '404':
+        "404":
           description: PID profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
     delete:
       tags:
@@ -878,13 +878,13 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: PID profile deleted successfully
-        '404':
+        "404":
           description: PID profile not found
-        '400':
+        "400":
           description: Invalid request
-        '500':
+        "500":
           description: Internal server error
 
 components:
@@ -1086,7 +1086,7 @@ components:
         nodes:
           type: array
           items:
-            $ref: '#/components/schemas/Node'
+            $ref: "#/components/schemas/Node"
       required:
         - firmwareversion
         - espnowmac
@@ -1113,7 +1113,7 @@ components:
         pumps:
           type: array
           items:
-            $ref: '#/components/schemas/PumpClientSetting'
+            $ref: "#/components/schemas/PumpClientSetting"
       required:
         - name
         - settings
@@ -1124,7 +1124,7 @@ components:
         nodes:
           type: array
           items:
-            $ref: '#/components/schemas/PumpNodeSetting'
+            $ref: "#/components/schemas/PumpNodeSetting"
     PumpNodeSetting:
       type: object
       properties:
@@ -1214,7 +1214,7 @@ components:
         Settings:
           type: array
           items:
-            $ref: '#/components/schemas/PIDSetting'
+            $ref: "#/components/schemas/PIDSetting"
       required:
         - name
         - Settings
