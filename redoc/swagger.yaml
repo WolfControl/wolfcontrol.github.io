@@ -7,6 +7,8 @@ info:
 servers:
   - url: https://app.wolfcontrol.io/api/v1
 tags:
+  - name: tasks
+    description: Operations on tasks for asynchronous processing
   - name: provisioning
     description: Provisioning of new gateways and clients
   - name: gateways
@@ -21,6 +23,79 @@ tags:
     description: PID profile management
 
 paths:
+  /tasks:
+    get:
+      tags:
+        - tasks
+      summary: Get a list of all tasks
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The page number to retrieve.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            default: 10
+          description: The number of tasks per page.
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - failed
+              - queued
+              - running
+              - succeeded
+              - canceled
+              - canceling
+          description: Filter tasks by status.
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum:
+              - adopt_gateway
+              - adopt_client
+              - upgrade_gateway
+              - upgrade_client
+          description: Filter tasks by type.
+      responses:
+        '200':
+          description: A list of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Internal server error
+  /tasks/{id}:
+    get:
+      tags:
+        - tasks
+      summary: Get a single task by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+        '500':
+          description: Internal server error
 
   /provisioning/gateways/{id}:
     post:
@@ -83,8 +158,7 @@ paths:
           description: Invalid request
         '500':
           description: Internal server error
-  
-    
+
   /gateways:
     get:
       tags:
@@ -219,54 +293,115 @@ paths:
           description: Internal server error
   /gateways/{name}/metrics:
     get:
-        tags:
-          - gateways
-        summary: Get sensor readings from a gateway
-        description: Select by time range and optionally node Ids
-        operationId: getSensorInfo
-        parameters:
-          - in: path
-            name: name
-            required: true
-            description: The Id of the gateway to retrieve data from.
-            schema:
+      tags:
+        - gateways
+      summary: Get sensor readings from a gateway
+      description: Select by time range and optionally node Ids
+      operationId: getSensorInfo
+      parameters:
+        - in: path
+          name: name
+          required: true
+          description: The Id of the gateway to retrieve data from.
+          schema:
+            type: string
+        - in: query
+          name: nodeIds
+          schema:
+            type: array
+            items:
               type: string
-          - in: query
-            name: nodeIds
+          required: false
+          description: An array of metric Ids to retrieve. Optional, if not provided, all metrics for the gateway are returned.
+        - in: query
+          name: startTime
+          schema:
+            type: string
+            format: date-time
+          required: true
+          description: The start of the time range for filtering sensor data (inclusive).
+        - in: query
+          name: endTime
+          schema:
+            type: string
+            format: date-time
+          required: false
+          description: The end of the time range for filtering sensor data (inclusive). If not provided, defaults to the current time.
+      responses:
+        '200':
+          description: A list of metrics matching the query parameters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Metric'
+        '400':
+          description: Bad request. One or more query parameters are missing or invalid.
+        '500':
+          description: Internal server error.
+  /gateways/{id}/update:
+    get:
+      tags:
+        - gateways
+      summary: Get available firmware versions for a gateway
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of available firmware versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayUpdate'
+        '404':
+          description: Gateway not found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - gateways
+      summary: Update the firmware of a gateway
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
             schema:
-              type: array
-              items:
+              type: object
+              properties:
+                espnowfirmwareversion:
+                  type: string
+                wififirmwareversion:
+                  type: string
+              required:
+                - espnowfirmwareversion
+                - wififirmwareversion
+      responses:
+        '202':
+          description: Firmware upgrade task created successfully
+          content:
+            application/json:
+              schema:
                 type: string
-            required: false
-            description: An array of metric Ids to retrieve. Optional, if not provided, all metrics for the gateway are returned.
-          - in: query
-            name: startTime
-            schema:
-              type: string
-              format: date-time
-            required: true
-            description: The start of the time range for filtering sensor data (inclusive).
-          - in: query
-            name: endTime
-            schema:
-              type: string
-              format: date-time
-            required: false
-            description: The end of the time range for filtering sensor data (inclusive). If not provided, defaults to the current time.
-        responses:
-          '200':
-            description: A list of metrics matching the query parameters.
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Metric'
-          '400':
-            description: Bad request. One or more query parameters are missing or invalid.
-          '500':
-            description: Internal server error.
-
+                example: '123abc-456def-789ghi'
+        '404':
+          description: Gateway not found
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
 
   /clients:
     get:
@@ -389,6 +524,65 @@ paths:
                   - online
                   - unknown
                   - error
+        '500':
+          description: Internal server error
+  /clients/{id}/update:
+    get:
+      tags:
+        - clients
+      summary: Get available firmware versions for a client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of available firmware versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientUpdate'
+        '404':
+          description: Client not found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - clients
+      summary: Update the firmware of a client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firmwareversion:
+                  type: string
+              required:
+                - firmwareversion
+      responses:
+        '202':
+          description: Firmware upgrade task created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: '123abc-456def-789ghi'
+        '404':
+          description: Client not found
+        '400':
+          description: Invalid request
         '500':
           description: Internal server error
 
@@ -629,7 +823,7 @@ paths:
         '500':
           description: Internal server error
   /pid-profiles/{name}:
-    get: 
+    get:
       tags:
         - pid-profiles
       summary: Get a single PID profile by ID
@@ -692,9 +886,43 @@ paths:
           description: Invalid request
         '500':
           description: Internal server error
-          
+
 components:
   schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - adopt_gateway
+            - adopt_client
+            - upgrade_gateway
+            - upgrade_client
+        status:
+          type: string
+          enum:
+            - failed
+            - queued
+            - running
+            - succeeded
+            - canceled
+            - canceling
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - status
+        - created
+        - updated
+
     GatewayHeartbeat:
       type: object
       properties:
@@ -752,14 +980,51 @@ components:
         - nodes
         - status
 
-
+    GatewayUpdate:
+      type: object
+      properties:
+        espnowfirmwareversion:
+          type: string
+        wififirmwareversion:
+          type: string
+        espnowreleasedate:
+          type: string
+          format: date-time
+        wifireleasedate:
+          type: string
+          format: date-time
+        espnowdownloadurl:
+          type: string
+        wifidownloadurl:
+          type: string
+      required:
+        - espnowfirmwareversion
+        - wififirmwareversion
+        - espnowreleasedate
+        - wifireleasedate
+        - espnowdownloadurl
+        - wifidownloadurl
+    ClientUpdate:
+      type: object
+      properties:
+        firmwareversion:
+          type: string
+        releasedate:
+          type: string
+          format: date-time
+        downloadurl:
+          type: string
+      required:
+        - firmwareversion
+        - releasedate
+        - downloadurl
 
     Gateway:
       type: object
       properties:
         espnowfirmwareversion:
           type: string
-        espwififirmwareversion:
+        wififirmwareversion:
           type: string
         espnowmac:
           type: string
@@ -837,7 +1102,6 @@ components:
           type: string
           format: date-time
           nullable: true
-    
 
     NutrientProfile:
       type: object
@@ -853,7 +1117,7 @@ components:
       required:
         - name
         - settings
-    
+
     PumpClientSetting:
       type: object
       properties:
@@ -882,29 +1146,29 @@ components:
           nullable: true
 
     Metric:
-          type: object
-          properties:
-            NodeId:
-              type: string
-            ClientID:
-              type: string
-            GatewayID:
-              type: string
-            Timestamps:
-              type: array
-              items:
-                type: string
-                format: date-time
-            Values:
-              type: array
-              items:
-                type: number
-          required:
-            - NodeId
-            - ClientID
-            - GatewayID
-            - Timestamps
-            - Values
+      type: object
+      properties:
+        NodeId:
+          type: string
+        ClientID:
+          type: string
+        GatewayID:
+          type: string
+        Timestamps:
+          type: array
+          items:
+            type: string
+            format: date-time
+        Values:
+          type: array
+          items:
+            type: number
+      required:
+        - NodeId
+        - ClientID
+        - GatewayID
+        - Timestamps
+        - Values
 
     StateProfile:
       type: object
@@ -974,9 +1238,3 @@ components:
         - kp
         - ki
         - kd
-
-# V2 proposed changes
-# Move adoption routes to gateways and clients
-# Pagination
-# Change name to id throughout, unique identifier
-# Use description for human readable names
