@@ -74,6 +74,31 @@ paths:
                   $ref: "#/components/schemas/Task"
         "500":
           description: Internal server error
+    post:
+      tags:
+        - tasks
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreationRequest"
+      responses:
+        "202":
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "123abc-456def-789ghi"
+            
+
+        "500":
+          description: Internal server error
   /tasks/{id}:
     get:
       tags:
@@ -889,6 +914,43 @@ paths:
 
 components:
   schemas:
+
+    TaskCreationRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "test_task"
+        params:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/TestTaskParams"
+            - $ref: "#/components/schemas/UpdateTaskParams"
+      required:
+        - type
+        - params
+
+    TestTaskParams:
+      type: object
+      properties:
+        test_string:
+          type: string
+          example: "example string"
+        test_int:
+          type: integer
+          example: 123
+      required:
+        - test_string
+        - test_int
+
+    UpdateTaskParams:
+      type: object
+      properties:
+        update_url:
+          type: string
+          example: "https://example.com/update"
+      required:
+        - update_url
     Task:
       type: object
       properties:
@@ -1018,7 +1080,7 @@ components:
         - firmwareversion
         - releasedate
         - downloadurl
-
+  
     Gateway:
       type: object
       properties:
