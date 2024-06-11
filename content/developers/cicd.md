@@ -1,63 +1,59 @@
 +++
 title = "Continuous Integration/Deployment"
 type = "docs"
-weight = 10
+weight = 2
 +++
 
 ## Overview
 
-As we saw in [System Architecture](/developers/architecture), the WolfControl system is made up of many different components. To ensure that all these components work together seamlessly, we use a system of continuous integration/continuous deployment (CI/CD) pipelines. This automates the process of building, testing, and deploying changes to the system, ensuring that everything is always up-to-date and working as expected.
+As seen in [System Architecture](/developers/architecture), the WolfControl system is composed of various components. To ensure seamless integration and functionality, we employ continuous integration/continuous deployment (CI/CD) pipelines. These pipelines automate the building, testing, and deployment processes, ensuring that all components are up-to-date and operational.
 
 ## Firmware Libraries
 
-A number of firmware libraries are shared across all devices in the WolfControl system. These libraries are updated frequently to add new features, fix bugs, and improve performance. To ensure that all devices are using the latest versions of these libraries, we use a CI/CD pipeline to automatically update the firmware repositories whenever a new release is created.
+The WolfControl system uses several shared firmware libraries across all devices. These libraries are updated frequently to add features, fix bugs, and improve performance. Our CI/CD pipeline ensures that all devices use the latest library versions by automatically updating firmware repositories when a new release is created.
 
-Currently, changes are made directly in the main branch of each library. Development firmware is built using the latest commit from each library, while production firmware is built using the latest release.
+The current process is as follows:
 
-The process works as follows:
-
-1. A new release of a library is created. (Releases are manually created right now, but will be moved towards automation in the future.)
-2. All repositories for firmware using that library are notified of the new release.
-3. A new commit is automatically made to each firmware repository, updating the library version in the `platformio.ini` file.
-4. The standard firmware build process is triggered, creating a new firmware binary with the updated library version.
-5. Upon successful build, a new release is created for the firmware repository, versioned based on the changes in the library being major, minor, or patch.
+1. **Release Creation:** A new release of a library is manually created. (We aim to automate this in the future.)
+2. **Notification:** All firmware repositories using the library are notified of the new release.
+3. **Update Commit:** An automated commit updates the library version in the `platformio.ini` file of each firmware repository.
+4. **Build Trigger:** The standard firmware build process is triggered, generating a new firmware binary with the updated library version.
+5. **Release Creation:** Upon successful build, a new firmware release is created, versioned according to the library changes (major, minor, or patch).
 
 ## Firmware
 
-Changes to the firmware repositories are infrequent, as most functionality is encapsulated within the shared libraries. When changes are made, they are typically limited to modifications in the PlatformIO configurations or hardware-specific code. Currently new builds are triggered on every commit to the main branch, but this will be replaced with a proper process utilizing a development branch and pull requests in the near future.
+Firmware repository changes are infrequent, as most functionality resides within shared libraries. Changes typically involve PlatformIO configurations or hardware-specific code. Currently, new builds are triggered on every commit to the main branch. We plan to transition to a development branch and pull requests for a more structured process.
 
 ## Backend Libraries
 
-Similar to the firmware libraries, the backend services rely on a number of shared libraries for things like database access, logging, and MQTT communication. These libraries are updated frequently, and a CI/CD pipeline is used to ensure that all services are using the latest versions.
+Backend services rely on shared libraries for database access, logging, and MQTT communication. While these libraries are not frequently updated, a CI/CD pipeline ensures all services use the latest versions.
 
-The process for updating backend libraries is similar to that for firmware libraries:
+The update process for backend libraries is similar to firmware libraries:
 
-1. A new release of a library is created manually.
-2. All repositories for backend services using that library are notified of the new release.
-3. A new commit is automatically made to each service repository, updating the library version in the `go.mod` file.
-4. The standard build process is triggered.
+1. **Release Creation:** A new release of a library is manually created.
+2. **Notification:** All backend service repositories using the library are notified of the new release.
+3. **Update Commit:** An automated commit updates the library version in the `go.mod` file of each service repository.
+4. **Build Trigger:** The standard build process is initiated.
 
 ## Backend
 
-The build system for the backend is under development. Currently, changes are made directly in the main branch of each service repository. Commits trigger a build process outlined below:
+The backend build system is under development. Currently, changes are committed directly to the main branch of each service repository, triggering the following build process:
 
-1. The go binary is built using the latest commit from the main branch.
-2. If successful, it is recompiled within a lean docker container.
-3. Version is determined based on the latest commit message.
-4. The container is pushed to dockerhub.
-5. A new release is created for the service repository.
+1. **Build:** The Go binary is built using the latest commit from the main branch.
+2. **Recompile:** If successful, the binary is recompiled within a lean Docker container.
+3. **Versioning:** The version is determined based on the latest commit message.
+4. **Push to DockerHub:** The container is pushed to DockerHub.
+5. **Release Creation:** A new release is created for the service repository.
 
 ## Documentation
 
-Code documentation is built using Hugo, Docsy, and Dart Sass. API documentation is generated using redoc, and all documentation is hosted on GitHub Pages.
+Code documentation is built using Hugo, Docsy, and Dart Sass. API documentation is generated with Redoc, and all documentation is hosted on GitHub Pages.
 
-Documentation is automatically updated on push to the `main` branch of the documentation repository. The following steps are taken in a cloud hosted runner:
+Documentation updates are triggered on push to the `main` branch of the documentation repository, following these steps in a cloud-hosted runner:
 
-1. Checkout the repository
-2. Install Node and Redoc CLI
-3. Generate API documentation
-4. Install Hugo and Dart Sass
-5. Configure Github Pages
-6. Install all dependencies
-7. Build the site
-8. Deploy the site to Github Pages
+1. **Checkout:** Checkout the documentation repository.
+2. **Install Dependencies:** Install Node, Redoc CLI, Hugo, and Dart Sass.
+3. **Generate API Documentation:** Generate API documentation.
+4. **Configure:** Configure GitHub Pages.
+5. **Build:** Build the site.
+6. **Deploy:** Deploy the site to GitHub Pages.
