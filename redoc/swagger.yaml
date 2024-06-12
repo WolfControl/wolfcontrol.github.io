@@ -9,6 +9,8 @@ servers:
 tags:
   - name: tasks
     description: Operations on tasks for asynchronous processing
+  - name: adoption
+    description: Operations on adoption of gateways and clients
   - name: gateways
     description: Gateway management
   - name: clients
@@ -120,6 +122,43 @@ paths:
         "500":
           description: Internal server error
 
+  /discover/gateways:
+    get:
+      tags:
+        - adoption
+      summary: Get a list of all discoverable gateways
+      responses:
+        "200":
+          description: A list of discoverable gateways
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GatewayHeartbeat"
+        "404":
+          description: No discoverable gateways found
+        "500":
+          description: Internal server error
+  /discover/clients:
+    get:
+      tags:
+        - adoption
+      summary: Get a list of all discoverable clients
+      responses:
+        "200":
+          description: A list of discoverable clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClientHeartbeat"
+        "404":
+          description: No discoverable clients found
+        "500":
+          description: Internal server error
+
   /gateways:
     get:
       tags:
@@ -136,24 +175,6 @@ paths:
                   $ref: "#/components/schemas/Gateway"
         "404":
           description: No gateways found
-        "500":
-          description: Internal server error
-  /gateways/discover:
-    get:
-      tags:
-        - gateways
-      summary: Get a list of all discoverable gateways
-      responses:
-        "200":
-          description: A list of discoverable gateways
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GatewayHeartbeat"
-        "404":
-          description: No discoverable gateways found
         "500":
           description: Internal server error
   /gateways/{name}:
@@ -408,24 +429,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Client"
-        "500":
-          description: Internal server error
-  /clients/discover:
-    get:
-      tags:
-        - clients
-      summary: Get a list of all discoverable clients
-      responses:
-        "200":
-          description: A list of discoverable clients
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/ClientHeartbeat"
-        "404":
-          description: No discoverable clients found
         "500":
           description: Internal server error
   /clients/{name}:
