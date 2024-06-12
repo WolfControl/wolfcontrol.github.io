@@ -12,25 +12,24 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.124.0
     steps:
-      - name: Checkout
+      - name: Checkout main repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Checkout WolfController (API) repository
+        uses: actions/checkout@v4
+        with:
+          repository: WolfControl/wolfcontroller
+          path: wolfcontroller
+          token: ${{ secrets.CICD_KEY }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -41,7 +40,7 @@ jobs:
         run: npm i -g @redocly/cli@latest
 
       - name: Generate API documentation
-        run: redocly build-docs redoc/swagger.yaml --output static/redoc-static.html
+        run: redocly build-docs wolfcontroller/api/swagger.yaml --output static/redoc-static.html
         
       - name: Install Hugo CLI
         run: |
