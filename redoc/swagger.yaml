@@ -9,8 +9,6 @@ servers:
 tags:
   - name: tasks
     description: Operations on tasks for asynchronous processing
-  - name: provisioning
-    description: Provisioning of new gateways and clients
   - name: gateways
     description: Gateway management
   - name: clients
@@ -122,68 +120,6 @@ paths:
         "500":
           description: Internal server error
 
-  /provisioning/gateways/{id}:
-    post:
-      tags:
-        - provisioning
-      summary: Adopt a gateway by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Gateway"
-      responses:
-        "200":
-          description: Gateway adopted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Gateway"
-        "404":
-          description: Gateway not found
-        "400":
-          description: Invalid request
-        "500":
-          description: Internal server error
-
-  /provisioning/clients/{id}:
-    post:
-      tags:
-        - provisioning
-      summary: Adopt a client by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Client"
-      responses:
-        "200":
-          description: Client adopted successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Client"
-        "404":
-          description: Client not found
-        "400":
-          description: Invalid request
-        "500":
-          description: Internal server error
-
   /gateways:
     get:
       tags:
@@ -202,7 +138,7 @@ paths:
           description: No gateways found
         "500":
           description: Internal server error
-  /gateways/provisioning:
+  /gateways/discover:
     get:
       tags:
         - gateways
@@ -427,6 +363,36 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+  /gateways/{id}/adopt:
+    post:
+      tags:
+        - gateways
+      summary: Adopt a gateway by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Gateway"
+      responses:
+        "200":
+          description: Gateway adopted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Gateway"
+        "404":
+          description: Gateway not found
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
 
   /clients:
     get:
@@ -444,7 +410,7 @@ paths:
                   $ref: "#/components/schemas/Client"
         "500":
           description: Internal server error
-  /clients/provisioning:
+  /clients/discover:
     get:
       tags:
         - clients
@@ -604,6 +570,36 @@ paths:
               schema:
                 type: string
                 example: "123abc-456def-789ghi"
+        "404":
+          description: Client not found
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+  /clients/{id}/adopt:
+    post:
+      tags:
+        - clients
+      summary: Adopt a client by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Client"
+      responses:
+        "200":
+          description: Client adopted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
         "404":
           description: Client not found
         "400":
