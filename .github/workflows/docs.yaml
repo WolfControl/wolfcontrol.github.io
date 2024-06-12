@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '.github/**'
+      - '**/*.md'
   workflow_dispatch:
+  repository_dispatch:
+    types: [swagger-update]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
