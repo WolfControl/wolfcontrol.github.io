@@ -138,14 +138,24 @@ Documentation is written in Markdown and built using Hugo. The site is hosted on
 flowchart TB
 subgraph Documentation
     D1[Developer: Commit directly to main]
-    subgraph DP["CI/CD Pipeline"]
-        D2[Action: Generate API Docs]
-        D3[Action: Build Site]
-        D4[Action: Deploy to GitHub Pages]
+    subgraph DP["Docs: Build Pipeline"]
+        D2[Action: Fetch API repo]
+        D3[Action: Generate API Docs]
+        D4[Action: Build Site]
+        D5[Action: Deploy to GitHub Pages]
     end
-    D1 --> DP
+end
+subgraph API
+    A1[Developer: Modify swagger.yaml]
+    subgraph AP["Document Dispatch Job"]
+        DD[Notify Docs Repo]
+    end
+end
+
+    A1 -- "Trigger" --> AP
+    D1 -- "Trigger" --> DP
+    DD -- "Dispatch" --> DP
     D2 --> D3
     D3 --> D4
-    
-end
+    D4 --> D5
 ```
