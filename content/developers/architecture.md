@@ -96,7 +96,7 @@ Backend services are written in Go, while the frontend uses vanilla JS. A librar
 
 Backend services include:
 
-- **Pulse:** Listens for device heartbeats and updates status in Redis.
+- **Pulse:** Listens for device heartbeats and tracks status in Redis.
 - **Sense:** Listens for sensor readings and records them in InfluxDB.
 - **Balance:** Implements PID control to maintain setpoints.
 - **API:** Provides a RESTful API for all system operations.
