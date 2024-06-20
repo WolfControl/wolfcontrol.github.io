@@ -61,7 +61,7 @@ F5 --> F6 --> F7 --> F8
 L1 -- "Review" --> L2
 L2 -- "Trigger" --> LJ
 F1 -- "Trigger" --> FP
-F3 -- "Trigger" --> FP
+FJ -- "Trigger" --> FP
 L3 -- "Dispatch" --> FJ
 
 ```
