@@ -10,7 +10,7 @@ WolfControl is a complex system comprising various components that interact seam
 
 ## Communication: Clients and Gateways
 
-Wolf Client devices interface with various sensors and actuators to control the environment. These client devices connect to a gateway over a 2.4GHz wireless network using the ESP-NOW protocol. The gateway aggregates data from all client devices and communicates with the WolfController over WiFi, handling commands and lifecycle management for its clients.
+Wolf Client devices interface with various sensors and actuators to control the environment. These client devices connect to a gateway over a 2.4GHz wireless network using the ESP-NOW protocol. Gateways aggregate data from all their client devices and communicates back to the WolfController over MQTT on WiFi, handling commands and lifecycle management for its clients.
 
 ```mermaid
 graph
@@ -45,32 +45,29 @@ graph
 
 The WolfController is the heart of the WolfControl system, handling data processing, storage, system state management, and providing a user interface for configuration and monitoring. It runs as a set of microservices in Docker containers, hosted on a Raspberry Pi 5.
 
+Sensor readings and device heartbeats are received by the message broker from the gateways (not shown in the diagram) and passed to the appropriate services for processing.
+
 ```mermaid
 graph LR
 subgraph "Container Environment"
-    Broker
+    Broker[Message Broker]
     Sense
     Pulse
     Balance
-    subgraph "Databases"
-        Influx[(InfluxDB)]
-        Mongo[(MongoDB)]
-        Redis[(Redis)]
-    end
+    Compose
     API[API Service]
     WebApp[Web Application]
-end
+    Influx[(InfluxDB)]
+    Mongo[(MongoDB)]
+    Redis[(Redis)]
+    end
 
-Broker -- "Sensor Readings" --> Sense
-Broker -- "Device Heartbeats" --> Pulse
-Sense --> Influx
-Pulse --> Redis
+Broker -- "Sensor Readings" --> Sense --> Influx
+Broker -- "Device Heartbeats" --> Pulse --> Redis
+Broker -- "Service Update Requests" --> Compose
+Broker -- "PID Control" --> Balance
 
-Databases --> Balance
-Databases <--> API
+API <--> Mongo
 
-API -- "Lifecycle Management" --> Broker
-API  <--> WebApp
-
-Balance -- "PID Control" --> Broker
+WebApp <--> API <--> Broker
 ```
