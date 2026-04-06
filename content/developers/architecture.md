@@ -10,7 +10,7 @@ WolfControl is a complex system comprising various components that interact seam
 
 ## Communication: Clients and Gateways
 
-Wolf Client devices interface with various sensors and actuators to control the environment. These client devices connect to a gateway over a 2.4GHz wireless network using the ESP-NOW protocol. Gateways aggregate data from all their client devices and communicates back to the WolfController over MQTT on WiFi, handling commands and lifecycle management for its clients.
+Wolf Client devices interface with various sensors and actuators to control the environment. These client devices connect to a gateway over a 2.4GHz wireless network using the ESP-NOW protocol. Gateways aggregate data from all their client devices and communicates with the backend over MQTT on WiFi, handling commands and lifecycle management for its clients.
 
 ```mermaid
 graph
@@ -41,33 +41,32 @@ graph
         E5 <-- "WiFi" --> M1["MQTT Broker"]
 ```
 
-## Microservices: WolfController
+## Backend
 
-The WolfController is the heart of the WolfControl system, handling data processing, storage, system state management, and providing a user interface for configuration and monitoring. It runs as a set of microservices in Docker containers, hosted on a Raspberry Pi 5.
+The backend is the heart of the WolfControl system, handling data processing, storage, system state management, and providing a user interface for configuration and monitoring. It runs as a set of microservices in Docker containers, hosted on a Raspberry Pi 5.
 
 Sensor readings and device heartbeats are received by the message broker from the gateways (not shown in the diagram) and passed to the appropriate services for processing.
 
 ```mermaid
 graph LR
-subgraph "Container Environment"
-    Broker[Message Broker]
-    Sense
-    Pulse
-    Balance
-    Compose
-    API[API Service]
-    WebApp[Web Application]
-    Influx[(InfluxDB)]
+subgraph "Backend [Host Device]"
+    MQTTBroker["MQTT Broker"]
+    InfluxDB[(InfluxDB)]
     Mongo[(MongoDB)]
     Redis[(Redis)]
-    end
+    WebApp[Web Application]
+    Sense
+    Pulse
+    WolfController
+end
 
-Broker -- "Sensor Readings" --> Sense --> Influx
-Broker -- "Device Heartbeats" --> Pulse --> Redis
-Broker -- "Service Update Requests" --> Compose
-Broker -- "PID Control" --> Balance
+MQTTBroker -- "Sensor Data" --> Sense --> InfluxDB
+MQTTBroker -- "Heartbeat Data" --> Pulse  --> Redis
 
-API <--> Mongo
+WolfController -- "Commands" --> MQTTBroker
+Mongo <-- "Device Profiles" --> WolfController
+Redis -- "Connected Devices" --> WolfController
+InfluxDB -- "Historical Data" --> WolfController
 
-WebApp <--> API <--> Broker
+WolfController  <--> WebApp
 ```

@@ -4,23 +4,20 @@ type = "docs"
 weight = 2
 +++
 
+## OUTDATED
+
+This page is out of date. TODO: Update to reflect shared WolfOS firmware, microservices monorepo, changes to CICD pipelines.
+
 ## Overview
 
 As seen in [System Architecture](/developers/architecture), the WolfControl system is composed of a number of different components. To ensure seamless integration and functionality, a number of patterns and strategies have been implemented.
 
-The codebase for WolfControl can be divided into 5 main categories:
+The codebase for WolfControl can be divided into 4 main categories:
 
 1. Firmware - The code that runs on the actual hardware devices.
 2. Firmware Libraries - Shared libraries used by all firmware.
-3. Microservices - Backend services that run on the WolfController.
-4. Go Modules - Middleware for the backend services.
-5. Documentation - This documentation site, as well as 3D models, schematics, and other resources.
-
-## Branch Strategy
-
-WolfControl is developed by a single developer, so there is no need for complex branching strategies like GitFlow. Instead, all repositories use the trunk-based development strategy where all changes are made directly to the main branch. This simplifies the development process and allows for faster iteration.
-
-New Repositories are configured with Actions secrets and an initial tag of v0.0.0.
+3. Services - Backend services that run on the WolfController.
+4. Documentation - This documentation site, as well as 3D models, schematics, and other resources.
 
 ## Continuous Integration & Deployment
 
