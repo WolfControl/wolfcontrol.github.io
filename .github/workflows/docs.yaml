@@ -39,12 +39,15 @@ jobs:
         run: |
           VERSION=${{ github.event.client_payload.version }}
           mkdir -p specs/wolfcontroller
-          cp services/wolfcontroller/api/swagger.yaml specs/wolfcontroller/${VERSION}.yaml
-          cp services/wolfcontroller/api/swagger.yaml specs/wolfcontroller/latest.yaml
+          sed "s/^  version: .*/  version: ${VERSION}/" \
+            services/wolfcontroller/api/swagger.yaml \
+            > specs/wolfcontroller/${VERSION}.yaml
+          cp specs/wolfcontroller/${VERSION}.yaml specs/wolfcontroller/latest.yaml
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add specs/wolfcontroller/
           git diff --cached --quiet || git commit -m "docs: add wolfcontroller ${VERSION} spec"
+          git pull --rebase origin main
           git push
 
       - name: Install Node.js
