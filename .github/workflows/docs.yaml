@@ -6,13 +6,12 @@ on:
       - main
     paths-ignore:
       - '.github/**'
-  workflow_dispatch:
   repository_dispatch:
     types: [swagger-update]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -28,12 +27,25 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Checkout WolfController (API) repository
+      - name: Checkout WolfControl services repository
         uses: actions/checkout@v4
         with:
-          repository: WolfControl/wolfcontroller
-          path: wolfcontroller
+          repository: WolfControl/services
+          path: services
           token: ${{ secrets.CICD_KEY }}
+
+      - name: Store versioned spec
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          VERSION=${{ github.event.client_payload.version }}
+          mkdir -p specs/wolfcontroller
+          cp services/wolfcontroller/api/swagger.yaml specs/wolfcontroller/${VERSION}.yaml
+          cp services/wolfcontroller/api/swagger.yaml specs/wolfcontroller/latest.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add specs/wolfcontroller/
+          git diff --cached --quiet || git commit -m "docs: add wolfcontroller ${VERSION} spec"
+          git push
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -43,9 +55,17 @@ jobs:
       - name: Install redocly CLI
         run: npm i -g @redocly/cli@latest
 
-      - name: Generate API documentation
-        run: redocly build-docs wolfcontroller/api/swagger.yaml --output static/redoc-static.html
-        
+      - name: Build API docs for all versions
+        run: |
+          mkdir -p static/api/wolfcontroller
+          versions=()
+          for spec in $(ls specs/wolfcontroller/v*.yaml 2>/dev/null | sort -V -r); do
+            ver=$(basename "$spec" .yaml)
+            redocly build-docs "$spec" --output "static/api/wolfcontroller/${ver}.html"
+            versions+=("\"${ver}\"")
+          done
+          echo "[$(IFS=,; echo "${versions[*]}")]" > static/api/wolfcontroller/versions.json
+
       - name: Install Hugo CLI
         run: |
           wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
@@ -66,7 +86,6 @@ jobs:
 
       - name: Build with Hugo
         env:
-          # For maximum backward compatibility with Hugo modules
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: |
@@ -74,13 +93,12 @@ jobs:
             --gc \
             --minify \
             --baseURL "${{ steps.pages.outputs.base_url }}/"
-                    
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
