@@ -7,3 +7,6 @@ proxy = "direct"
 path = "github.com/google/docsy"
 
 ui.sidebar_menu_foldable = true
+
+[markup.goldmark.renderer]
+unsafe = true
