@@ -1,0 +1,882 @@
+openapi: 3.0.0
+info:
+  title: WolfControl API - OpenAPI 3.0
+  description: |-
+    Local API for monitoring and state management of WolfControl clients.
+  version: 1.0.0
+tags:
+  - name: state-profiles
+    description: Desired state profile management
+  - name: nutrient-profiles
+    description: Nutrient dosing profile management
+  - name: pid-profiles
+    description: PID controller profile management
+
+paths:
+  /state-profiles:
+    get:
+      tags:
+        - state-profiles
+      operationId: ListStateProfiles
+      summary: Get a list of all state profiles
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: A paginated list of state profiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedStateProfiles"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - state-profiles
+      operationId: CreateStateProfile
+      summary: Create a new state profile
+      description: >
+        Creates a new state profile. Settings and individual target fields are
+        optional — omitted fields mean this profile does not manage that target.
+        Provided values are rounded to 2 decimal places.
+      requestBody:
+        description: State profile object to be created
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateProfileCreate"
+      responses:
+        "201":
+          description: The created state profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /state-profiles/{id}:
+    get:
+      tags:
+        - state-profiles
+      operationId: GetStateProfile
+      summary: Get a single state profile by ID
+      parameters:
+        - $ref: "#/components/parameters/StateProfileID"
+      responses:
+        "200":
+          description: A single state profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateProfile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - state-profiles
+      operationId: UpdateStateProfile
+      summary: Update a state profile by ID
+      description: >
+        Omit a field to preserve it. Set a settings field to null to clear that
+        target. Provide a value to update it. Values are rounded to 2 decimal places.
+      parameters:
+        - $ref: "#/components/parameters/StateProfileID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StateProfileUpdate"
+      responses:
+        "200":
+          description: The updated state profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - state-profiles
+      operationId: DeleteStateProfile
+      summary: Delete a state profile by ID
+      parameters:
+        - $ref: "#/components/parameters/StateProfileID"
+      responses:
+        "204":
+          description: State profile deleted successfully
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /nutrient-profiles:
+    get:
+      tags:
+        - nutrient-profiles
+      operationId: ListNutrientProfiles
+      summary: Get a list of all nutrient profiles
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: A paginated list of nutrient profiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedNutrientProfiles"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - nutrient-profiles
+      operationId: CreateNutrientProfile
+      summary: Create a new nutrient profile
+      description: >
+        Creates a new nutrient profile. Nutrients is an optional list of chemicals
+        and their dosing rates in mL per gallon.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutrientProfileCreate"
+      responses:
+        "201":
+          description: The created nutrient profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutrientProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /nutrient-profiles/{id}:
+    get:
+      tags:
+        - nutrient-profiles
+      operationId: GetNutrientProfile
+      summary: Get a single nutrient profile by ID
+      parameters:
+        - $ref: "#/components/parameters/NutrientProfileID"
+      responses:
+        "200":
+          description: A single nutrient profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutrientProfile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - nutrient-profiles
+      operationId: UpdateNutrientProfile
+      summary: Update a nutrient profile by ID
+      description: >
+        Omit a field to preserve it. Set description or nutrients to null to clear
+        them. Providing a nutrients array replaces the entire list.
+      parameters:
+        - $ref: "#/components/parameters/NutrientProfileID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NutrientProfileUpdate"
+      responses:
+        "200":
+          description: The updated nutrient profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NutrientProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - nutrient-profiles
+      operationId: DeleteNutrientProfile
+      summary: Delete a nutrient profile by ID
+      parameters:
+        - $ref: "#/components/parameters/NutrientProfileID"
+      responses:
+        "204":
+          description: Nutrient profile deleted successfully
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /pid-profiles:
+    get:
+      tags:
+        - pid-profiles
+      operationId: ListPIDProfiles
+      summary: Get a list of all PID profiles
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: A paginated list of PID profiles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedPIDProfiles"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - pid-profiles
+      operationId: CreatePIDProfile
+      summary: Create a new PID profile
+      description: >
+        Creates a new PID profile. Both name and params are required. All params
+        fields (kp, ki, kd, outputMin, outputMax) must be provided.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PIDProfileCreate"
+      responses:
+        "201":
+          description: The created PID profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PIDProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /pid-profiles/{id}:
+    get:
+      tags:
+        - pid-profiles
+      operationId: GetPIDProfile
+      summary: Get a single PID profile by ID
+      parameters:
+        - $ref: "#/components/parameters/PIDProfileID"
+      responses:
+        "200":
+          description: A single PID profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PIDProfile"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - pid-profiles
+      operationId: UpdatePIDProfile
+      summary: Update a PID profile by ID
+      description: >
+        Omit a field to preserve it. Set params to null to clear it. Provide params
+        to replace the entire tuning block — all 5 fields are required when provided.
+      parameters:
+        - $ref: "#/components/parameters/PIDProfileID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PIDProfileUpdate"
+      responses:
+        "200":
+          description: The updated PID profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PIDProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - pid-profiles
+      operationId: DeletePIDProfile
+      summary: Delete a PID profile by ID
+      parameters:
+        - $ref: "#/components/parameters/PIDProfileID"
+      responses:
+        "204":
+          description: PID profile deleted successfully
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  parameters:
+    StateProfileID:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The unique ID of the state profile
+
+    NutrientProfileID:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The unique ID of the nutrient profile
+
+    PIDProfileID:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+      description: The unique ID of the PID profile
+
+    PageParam:
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+      description: Page number to retrieve (1-based)
+
+    LimitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page (max 100)
+
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+    Forbidden:
+      description: Operation not permitted
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+
+  schemas:
+    APIError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Application-level error code
+        message:
+          type: string
+          description: Human-readable error description
+
+    # State Profiles
+
+    StateProfileSettings:
+      type: object
+      additionalProperties: false
+      properties:
+        ph:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 14
+          description: Desired pH level (must be > 0 and ≤ 14)
+          example: 6.2
+        ec:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          description: Desired electrical conductivity in mS/cm (must be > 0)
+          example: 1.4
+        waterTemp:
+          type: number
+          format: double
+          description: Desired water temperature in °C
+          example: 21.0
+        dayTemp:
+          type: number
+          format: double
+          description: Desired daytime air temperature in °C
+          example: 24.0
+        nightTemp:
+          type: number
+          format: double
+          description: Desired nighttime air temperature in °C
+          example: 20.0
+        humidity:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: Desired relative humidity as a percentage (must be ≥ 0 and ≤ 100)
+          example: 65.0
+
+    StateProfile:
+      type: object
+      required:
+        - id
+        - name
+        - settings
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Server-assigned unique identifier
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        settings:
+          $ref: "#/components/schemas/StateProfileSettings"
+
+    StateProfileCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        settings:
+          $ref: "#/components/schemas/StateProfileSettings"
+
+    StateProfileSettingsUpdate:
+      type: object
+      additionalProperties: false
+      description: >
+        PATCH semantics: omit a field to preserve it, set to null to clear it,
+        or provide a value to update it.
+      properties:
+        ph:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 14
+          nullable: true
+          description: Desired pH level (must be > 0 and ≤ 14). Null clears the target.
+          example: 6.2
+        ec:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          nullable: true
+          description: Desired electrical conductivity in mS/cm (must be > 0). Null clears the target.
+          example: 1.4
+        waterTemp:
+          type: number
+          format: double
+          nullable: true
+          description: Desired water temperature in °C. Null clears the target.
+          example: 21.0
+        dayTemp:
+          type: number
+          format: double
+          nullable: true
+          description: Desired daytime air temperature in °C. Null clears the target.
+          example: 24.0
+        nightTemp:
+          type: number
+          format: double
+          nullable: true
+          description: Desired nighttime air temperature in °C. Null clears the target.
+          example: 20.0
+        humidity:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          nullable: true
+          description: Desired relative humidity as a percentage. Null clears the target.
+          example: 65.0
+
+    StateProfileUpdate:
+      type: object
+      additionalProperties: false
+      description: >
+        PATCH semantics: omit a field to preserve it, set to null to clear it
+        (where nullable), or provide a value to update it.
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        settings:
+          $ref: "#/components/schemas/StateProfileSettingsUpdate"
+
+    PaginatedStateProfiles:
+      type: object
+      required:
+        - data
+        - total
+        - page
+        - limit
+        - totalPages
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/StateProfile"
+        total:
+          type: integer
+          format: int32
+          description: Total number of state profiles
+          example: 42
+        page:
+          type: integer
+          format: int32
+          description: Current page number (1-based)
+          example: 1
+        limit:
+          type: integer
+          format: int32
+          description: Number of items per page
+          example: 20
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+          example: 3
+
+    # Nutrient Profiles
+
+    NutrientEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - chemicalName
+        - ratio
+      properties:
+        chemicalName:
+          type: string
+          description: Name of the chemical or nutrient solution
+          example: FloraGro
+        ratio:
+          type: number
+          format: double
+          minimum: 0
+          exclusiveMinimum: true
+          description: Dosing rate in mL per gallon of water (must be > 0)
+          example: 2.5
+
+    NutrientProfile:
+      type: object
+      required:
+        - id
+        - name
+        - nutrients
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Server-assigned unique identifier
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        nutrients:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/NutrientEntry"
+
+    NutrientProfileCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - nutrients
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        nutrients:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/NutrientEntry"
+
+    NutrientProfileUpdate:
+      type: object
+      additionalProperties: false
+      description: >
+        PATCH semantics: omit a field to preserve it or provide a value to
+        update it. Providing a nutrients array replaces the entire list (must
+        be non-empty); omit to preserve existing nutrients.
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        nutrients:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/NutrientEntry"
+
+    PaginatedNutrientProfiles:
+      type: object
+      required:
+        - data
+        - total
+        - page
+        - limit
+        - totalPages
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NutrientProfile"
+        total:
+          type: integer
+          format: int32
+          description: Total number of nutrient profiles
+          example: 42
+        page:
+          type: integer
+          format: int32
+          description: Current page number (1-based)
+          example: 1
+        limit:
+          type: integer
+          format: int32
+          description: Number of items per page
+          example: 20
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+          example: 3
+
+    # PID Profiles
+
+    PIDParams:
+      type: object
+      additionalProperties: false
+      required:
+        - kp
+        - ki
+        - kd
+        - outputMin
+        - outputMax
+      properties:
+        kp:
+          type: number
+          format: double
+          minimum: 0
+          description: Proportional gain (must be ≥ 0)
+          example: 1.0
+        ki:
+          type: number
+          format: double
+          minimum: 0
+          description: Integral gain (must be ≥ 0)
+          example: 0.1
+        kd:
+          type: number
+          format: double
+          minimum: 0
+          description: Derivative gain (must be ≥ 0)
+          example: 0.01
+        outputMin:
+          type: number
+          format: double
+          description: Minimum controller output (must be < outputMax)
+          example: -100.0
+        outputMax:
+          type: number
+          format: double
+          description: Maximum controller output (must be > outputMin)
+          example: 100.0
+
+    PIDProfile:
+      type: object
+      required:
+        - id
+        - name
+        - params
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Server-assigned unique identifier
+          example: "507f1f77bcf86cd799439011"
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        params:
+          $ref: "#/components/schemas/PIDParams"
+
+    PIDProfileCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - params
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        params:
+          $ref: "#/components/schemas/PIDParams"
+
+    PIDProfileUpdate:
+      type: object
+      additionalProperties: false
+      description: >
+        PATCH semantics: omit a field to preserve it or provide a value to
+        update it. Providing params replaces the entire tuning block (all 5
+        fields required); omit to preserve existing params.
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        params:
+          $ref: "#/components/schemas/PIDParams"
+
+    PaginatedPIDProfiles:
+      type: object
+      required:
+        - data
+        - total
+        - page
+        - limit
+        - totalPages
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PIDProfile"
+        total:
+          type: integer
+          format: int32
+          description: Total number of PID profiles
+          example: 42
+        page:
+          type: integer
+          format: int32
+          description: Current page number (1-based)
+          example: 1
+        limit:
+          type: integer
+          format: int32
+          description: Number of items per page
+          example: 20
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+          example: 3
